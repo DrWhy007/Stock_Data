@@ -1,6 +1,13 @@
+import json
+import os
+
+import bson
+from bson.json_util import dumps
+import boto3
 import yfinance as yf
 from pymongo import MongoClient
-from datetime import datetime
+from dotenv import dotenv_values
+
 
 # List of stock tickers and time intervals to retrieve historical data
 tickers = ['XOM', 'CL=F']
@@ -38,7 +45,40 @@ def fetch_and_store_data(ticker):
     except Exception as e:
         print(f"An error occurred while fetching or storing data for {ticker}: {e}")
 
+
+
+# envoi des collections vers S3 https://awsacademy.instructure.com/courses/74365/modules/items/6677565
+def send_to_s3():
+    directory = "json_files"
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    for c in db.list_collection_names():
+        # print(c)
+        cursor = db[c].find({})
+
+        # save under project folder
+        # with open(f'{directory}/{c}.json', 'w') as file:
+            # json.dump(json.loads(dumps(cursor)), file)
+
+        # save in s3
+        env = dotenv_values(".env")
+        s3 = boto3.resource(
+            's3',
+            region_name=env["REGION_NAME"],
+            aws_access_key_id=env['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=env['AWS_SECRET_ACCESS_KEY'],
+            aws_session_token=env['AWS_SESSION_TOKEN'],
+        )
+
+        content = bson.json_util.dumps(cursor).encode('UTF-8')
+        # print(content)
+        s3.Object(env['BUCKETNAME'], f'stock_data_{directory}/{c}.json').put(Body=content)
+
+
 # Execution
 if __name__ == '__main__':
-    for ticker in tickers:
-        fetch_and_store_data(ticker)
+    # for ticker in tickers:
+        # fetch_and_store_data(ticker)
+    send_to_s3()
