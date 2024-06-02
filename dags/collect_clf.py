@@ -2,10 +2,9 @@ from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash import BashOperator
+
 import yfinance as yf
 from pymongo import MongoClient
-import requests 
-import json
 
 
 args = {
@@ -14,10 +13,10 @@ args = {
     'start_date': days_ago(1)
 }
 
-dag = DAG(dag_id = 'collect_data', default_args=args, schedule_interval=None)
+dag = DAG(dag_id = 'collect_clf_data', default_args=args, schedule_interval=None)
 
 # List of stock tickers and time intervals to retrieve historical data
-tickers = ['XOM', 'CL=F']
+ticker = 'CL=F'
 intervals = ['1h', '1d', '1wk', '1mo', '3mo']
 
 # Connect to MongoDB
@@ -25,7 +24,7 @@ client = MongoClient('localhost', 27017)
 db = client['stock_data']
 
 
-def fetch_and_store_data(ticker):
+def fetch_and_store_data():
     try:
         stock = yf.Ticker(ticker)
         for interval in intervals:
