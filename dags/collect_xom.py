@@ -5,6 +5,7 @@ from airflow.operators.bash import BashOperator
 
 import yfinance as yf
 from pymongo import MongoClient
+from datetime import datetime, timedelta
 
 
 args = {
@@ -13,7 +14,7 @@ args = {
     'start_date': days_ago(1)
 }
 
-dag = DAG(dag_id = 'collect_xom_data', default_args=args, schedule_interval=None)
+dag = DAG(dag_id = 'collect_xom_data', default_args=args, schedule_interval=timedelta(seconds=3600))
 
 # List of stock tickers and time intervals to retrieve historical data
 ticker = 'XOM'
