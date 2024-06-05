@@ -4,4 +4,3 @@ dags/__pycache__
 .idea/
 json_files
 envoi-fichiers-s3.png
-.env.example
