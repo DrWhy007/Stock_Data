@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation des Données</title>
+    <!--link rel="stylesheet" href="style.css"-->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Visualisation des Données</h1>
+    <form id="data-form">
+        <label for="ticker">Choix des Symboles:</label>
+        <select id="ticker" name="ticker" multiple>
+            <option value="XOM">XOM</option>
+            <option value="CL=F">CL=F</option>
+        </select>
+        <br>
+        <label for="interval">Choix des Intervalles:</label>
+        <select id="interval" name="interval">
+            <option value="1h">1 Heure</option>
+            <option value="1d">1 Jour</option>
+            <option value="1wk">1 Semaine</option>
+            <option value="1mo">1 Mois</option>
+        </select>
+        <br>
+        <label for="start_date">Date Début:</label>
+        <input type="date" id="start_date" name="start_date">
+        <br>
+        <label for="end_date">Date Fin:</label>
+        <input type="date" id="end_date" name="end_date">
+        <br>
+        <button type="submit">Éxecuter</button>
+    </form>
+    <div id="graph"></div>
+
+    <script>
+        document.getElementById('data-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            fetch('/data', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                var graph = document.getElementById('graph');
+                Plotly.newPlot(graph, data.data, data.layout);
+            });
+        });
+    </script>
+</body>
+</html>

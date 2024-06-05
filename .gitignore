@@ -1,2 +1,7 @@
 logs
 dags/__pycache__
+.env
+.idea/
+json_files
+envoi-fichiers-s3.png
+.env.example

@@ -4,6 +4,7 @@ from airflow.operators.python_operator import PythonOperator
 from airflow.operators.bash import BashOperator
 
 import yfinance as yf
+from dotenv import dotenv_values
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 
@@ -20,8 +21,10 @@ dag = DAG(dag_id = 'collect_clf_data', default_args=args, schedule_interval=time
 ticker = 'CL=F'
 intervals = ['1h', '1d', '1wk', '1mo', '3mo']
 
+env = dotenv_values("../.env")
+
 # Connect to MongoDB
-client = MongoClient('localhost', 27017)
+client = MongoClient(env['MONGODB_HOST'], env['MONGODB_PORT'])
 db = client['stock_data']
 
 

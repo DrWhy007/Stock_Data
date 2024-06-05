@@ -131,6 +131,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    env_file:
+      - path: .env
 
   airflow-scheduler:
     <<: *airflow-common
@@ -169,6 +171,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    env_file:
+      - path: .env
 
   airflow-triggerer:
     <<: *airflow-common
@@ -184,6 +188,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    env_file:
+      - path: .env
 
   airflow-init:
     <<: *airflow-common
@@ -248,6 +254,8 @@ services:
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
+    env_file:
+      - path: .env
 
   airflow-cli:
     <<: *airflow-common
@@ -261,6 +269,8 @@ services:
       - bash
       - -c
       - airflow
+    env_file:
+      - path: .env
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
@@ -283,6 +293,35 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    env_file:
+      - path: .env
+  
+  mongodb:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - 27019:27017
+    volumes:
+      - mongodb:/data/db
+      - configdb:/data/configdb
+
+  app:
+      build:
+        dockerfile: app/Dockerfile
+        context: .
+      container_name: app
+      volumes:
+        - "./app:/var/www/app"
+      ports:
+        - 5000:5000
+      depends_on:
+        - mongodb
+      env_file:
+        - path: .env
+
 
 volumes:
   postgres-db-volume:
+  mongodb:
+  configdb:
