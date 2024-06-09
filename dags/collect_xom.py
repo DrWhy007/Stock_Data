@@ -1,10 +1,9 @@
 from airflow.models import DAG
 from airflow.utils.dates import days_ago
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.bash import BashOperator
+from airflow.models import Variable
 
 import yfinance as yf
-from dotenv import dotenv_values
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 
@@ -15,27 +14,32 @@ args = {
     'start_date': days_ago(1)
 }
 
-dag = DAG(dag_id = 'collect_xom_data', default_args=args, schedule_interval=timedelta(seconds=3600))
+dag = DAG(dag_id = 'collect_xom_data', default_args=args,schedule="@daily")
 
-# List of stock tickers and time intervals to retrieve historical data
-ticker = 'XOM'
-intervals = ['1h', '1d', '1wk', '1mo', '3mo']
 
-env = dotenv_values("../.env")
 
-# Connect to MongoDB
-client = MongoClient(env['MONGODB_HOST'], env['MONGODB_PORT'])
-db = client['stock_data']
 
 
 
 def fetch_and_store_data():
     try:
+
+        # List of stock tickers and time intervals to retrieve historical data
+        ticker = 'XOM'
+        intervals = ['1h', '1d', '1wk', '1mo', '3mo']
+
+        # Connect to MongoDB
+        mongo_host = Variable.get("MONGODB_HOST")
+        mongo_port = Variable.get("MONGODB_PORT")
+        # Connect to MongoDB
+        #client = MongoClient(env['MONGODB_HOST'], env['MONGODB_PORT'])
+        client = MongoClient(mongo_host, int(mongo_port))
+        db = client['stock_data']
         stock = yf.Ticker(ticker)
         for interval in intervals:
             # Fetch historical data for the given interval (maximum available data)
             if interval == '1h':
-                data = stock.history(period='730d', interval=interval)  # Adjust period to be within last 730 days
+                data = stock.history(period='2y', interval=interval)  # Adjust period to be within last 730 days
             else:
                 data = stock.history(period='max', interval=interval)
             

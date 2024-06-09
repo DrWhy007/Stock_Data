@@ -61,6 +61,8 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    AIRFLOW_VAR_MONGODB_HOST: "mongodb"
+    AIRFLOW_VAR_MONGODB_PORT: 27017
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks
     # See https://airflow.apache.org/docs/apache-airflow/stable/administration-and-deployment/logging-monitoring/check-health.html#scheduler-health-check-server
@@ -131,8 +133,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
-    env_file:
-      - path: .env
+    
 
   airflow-scheduler:
     <<: *airflow-common
@@ -172,7 +173,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
     env_file:
-      - path: .env
+      - .env
 
   airflow-triggerer:
     <<: *airflow-common
@@ -189,7 +190,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
     env_file:
-      - path: .env
+      - .env
 
   airflow-init:
     <<: *airflow-common
@@ -255,7 +256,7 @@ services:
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
     env_file:
-      - path: .env
+      - .env
 
   airflow-cli:
     <<: *airflow-common
@@ -270,7 +271,7 @@ services:
       - -c
       - airflow
     env_file:
-      - path: .env
+      - .env
 
   # You can enable flower by adding "--profile flower" option e.g. docker-compose --profile flower up
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
@@ -294,14 +295,14 @@ services:
       airflow-init:
         condition: service_completed_successfully
     env_file:
-      - path: .env
+      - .env
   
   mongodb:
     image: mongo
     container_name: mongo
     restart: always
     ports:
-      - 27019:27017
+      - 27017:27017
     volumes:
       - mongodb:/data/db
       - configdb:/data/configdb
@@ -317,8 +318,6 @@ services:
         - 5000:5000
       depends_on:
         - mongodb
-      env_file:
-        - path: .env
 
 
 volumes:

@@ -8,12 +8,13 @@ from pymongo import MongoClient
 
 app = Flask(__name__)
 
-env = dotenv_values("../.env")
+env = dotenv_values("app/.env")
 
-print(env)
+print("MONGODB_HOST", env["MONGODB_HOST"])
+print("MONGODB_PORT", env["MONGODB_PORT"])
 
 # Connect to MongoDB
-client = MongoClient(env['MONGODB_HOST'], env['MONGODB_PORT'])
+client = MongoClient(env["MONGODB_HOST"], int(env["MONGODB_PORT"]))
 db = client['stock_data']
 
 @app.route('/')
